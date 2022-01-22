@@ -1,0 +1,120 @@
+#include <LiquidCrystal.h>
+
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
+const int buzzer = 13; //buzzer to arduino pin 13
+int alarm=8;
+int pin_gas=0;
+float data_gas=0;
+int bahaya=9;
+int aman=10;
+int sensor1 = 2; //photoresistor read
+int sensor2 = 0; //temperature sensor read
+
+
+void setup () {
+  
+    pinMode(A2, INPUT);
+    pinMode(A1, INPUT);
+   Serial.begin(9600);
+  pinMode(buzzer, OUTPUT); // Set buzzer - pin 13 sebagai output
+  
+}
+
+void loop() {
+  
+  sensor1 = analogRead(A2); //membaca sensor 1
+  Serial.println(sensor1); //print sensor 1
+  
+  
+  
+  if (sensor1>800) {
+    lcd.setCursor(0,1);
+    lcd.print(" Terlalu Terang ");
+    digitalWrite(bahaya,HIGH);
+    delay(100);
+    digitalWrite(aman, LOW);
+    delay(100);
+    Serial.println("Terlalu Cerah");
+    tone(buzzer, 1000); // mengirimkan 1KHz sinyal bunyi
+    delay(1000);        // 
+    noTone(buzzer);     // sound berhenti
+    delay(1000);        // 
+  }
+  else if (sensor1<400) {
+    digitalWrite(bahaya, LOW);
+    delay(1000);
+    digitalWrite(aman, HIGH);
+    delay(1000);
+    Serial.println("Terlalu Gelap");
+  }
+  else {
+    digitalWrite(aman, HIGH);
+    Serial.println("Normal");
+  }
+  
+   sensor2 = analogRead(A1); //membaca sensor2
+  Serial.println(sensor2); //print sensor 2
+  
+  if (sensor2>166) { //temperature more than 32 degree
+    lcd.setCursor(0,1);
+    lcd.print(" Suhu Tinggi!!! ");
+    Serial.println("Temperatur Tinggi");
+    digitalWrite(bahaya,HIGH);
+    delay(100);
+    digitalWrite(aman, LOW);
+    delay(100);
+    tone(buzzer, 1000); // Send 1KHz sound signal...
+    delay(1000);        // ...for 1 sec
+    noTone(buzzer);     // Stop sound...
+    delay(1000);        // ...for 1sec
+    
+  }
+  else if (sensor2<160) { //temperature less than 27 degree
+    Serial.println("Temperatur Rendah");
+    noTone(buzzer); 
+  }
+  else {
+    Serial.println("Normal");
+    noTone(buzzer); 
+  }
+
+  data_gas=analogRead(pin_gas);
+  lcd.setCursor(0,0);
+  lcd.print("Gas Detector");
+  lcd.setCursor(0,1);
+    lcd.print("Gas : ");
+    lcd.setCursor(6,2);
+    lcd.print(data_gas);
+    digitalWrite(alarm,LOW);
+    digitalWrite(bahaya,LOW);
+    digitalWrite(aman,HIGH);
+  
+  if(data_gas>600){
+    data_gas=analogRead(pin_gas);
+    digitalWrite(alarm,HIGH);
+    digitalWrite(bahaya,HIGH);
+    digitalWrite(aman,LOW);
+    lcd.setCursor(0,0);
+    lcd.print("Gas Detector");
+    lcd.setCursor(0,1);
+    lcd.print(" Asap Terdeteksi ");
+    delay(200);
+    tone(buzzer, 1000); // Send 1KHz sound signal...
+    delay(1000);        // ...for 1 sec
+    noTone(buzzer);     // Stop sound...
+    delay(1000);        // ...for 1sec
+  } 
+      
+  while(data_gas>600){
+  	if (sensor1>800){
+      if (sensor2>166){
+      }
+    }
+  lcd.setCursor(0,2);
+      lcd.print(" !!KEBAKARAN!!! ");
+      tone(buzzer, 1000);
+  delay(100);
+  }
+   
+}
